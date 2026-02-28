@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
+import { useLanguage } from "@/components/language-provider"
 import { useFinance } from "@/components/finance-provider"
 import { formatCurrency, categoryLabels, type TransactionCategory } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,6 +36,13 @@ const pieColors = [
 ]
 
 export function Dashboard() {
+  const { t } = useLanguage()
+
+  const areaChartConfig: ChartConfig = {
+    income: { label: t("dash.income"), color: "var(--chart-1)" },
+    expense: { label: t("dash.expense"), color: "var(--chart-2)" },
+  }
+
   const { transactions, accounts, stocks } = useFinance()
 
   const currentMonth = new Date().getMonth()
@@ -157,47 +165,47 @@ export function Dashboard() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <SummaryCard
-          label="ยอดเงินทั้งหมด"
+          label={t("dash.totalBalance")}
           value={formatCurrency(totalBalance)}
-          suffix="บาท"
+          suffix={t("currency.thb")}
           icon={<Wallet className="size-5" />}
           iconBg="bg-primary/10"
           iconColor="text-primary"
         />
         <SummaryCard
-          label="รายรับเดือนนี้"
+          label={t("dash.incomeThisMonth")}
           value={`+${formatCurrency(thisMonthIncome)}`}
-          suffix="บาท"
+          suffix={t("currency.thb")}
           icon={<TrendingUp className="size-5" />}
           iconBg="bg-chart-1/10"
           iconColor="text-chart-1"
           valueColor="text-chart-1"
         />
         <SummaryCard
-          label="รายจ่ายเดือนนี้"
+          label={t("dash.expenseThisMonth")}
           value={`-${formatCurrency(thisMonthExpense)}`}
-          suffix="บาท"
+          suffix={t("currency.thb")}
           icon={<TrendingDown className="size-5" />}
           iconBg="bg-chart-2/10"
           iconColor="text-chart-2"
           valueColor="text-chart-2"
         />
         <SummaryCard
-          label="มูลค่าการลงทุน"
+          label={t("dash.investValue")}
           value={formatCurrency(totalInvestment)}
-          suffix="USD"
+          suffix={t("currency.usd")}
           icon={<LineChart className="size-5" />}
           iconBg="bg-chart-3/10"
           iconColor="text-chart-3"
-          subtext={exchangeRate ? `≈ ${formatCurrency(totalInvestment * exchangeRate)} THB` : undefined}
+          subtext={exchangeRate ? `≈ ${formatCurrency(totalInvestment * exchangeRate)} ${t("currency.thb")}` : undefined}
         />
       </div>
 
       {/* Net this month badge */}
       <div className="flex items-center gap-2 rounded-xl border bg-card px-5 py-3">
-        <span className="text-sm text-muted-foreground">คงเหลือสุทธิเดือนนี้</span>
+        <span className="text-sm text-muted-foreground">{t("dash.netBalance")}</span>
         <span className={`ml-auto text-lg font-bold ${netThisMonth >= 0 ? "text-chart-1" : "text-chart-2"}`}>
-          {netThisMonth >= 0 ? "+" : ""}{formatCurrency(netThisMonth)} บาท
+          {netThisMonth >= 0 ? "+" : ""}{formatCurrency(netThisMonth)} {t("currency.thb")}
         </span>
       </div>
 
@@ -207,7 +215,7 @@ export function Dashboard() {
         <Card className="xl:col-span-3 border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              สรุปรายเดือน
+              {t("dash.monthlySummary")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -235,7 +243,7 @@ export function Dashboard() {
                 <ChartTooltip
                   content={
                     <ChartTooltipContent
-                      formatter={(value) => `${formatCurrency(Number(value))} บาท`}
+                      formatter={(value) => `${formatCurrency(Number(value))} ${t("currency.thb")}`}
                     />
                   }
                 />
@@ -258,11 +266,11 @@ export function Dashboard() {
             <div className="mt-4 flex items-center justify-center gap-6">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <div className="size-2.5 rounded-full bg-chart-1" />
-                รายรับ
+                {t("dash.income")}
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <div className="size-2.5 rounded-full bg-chart-2" />
-                รายจ่าย
+                {t("dash.expense")}
               </div>
             </div>
           </CardContent>
@@ -272,7 +280,7 @@ export function Dashboard() {
         <Card className="xl:col-span-2 border-0 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              รายจ่ายตามหมวดหมู่
+              {t("dash.categoryExpense")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -283,7 +291,7 @@ export function Dashboard() {
                     <ChartTooltip
                       content={
                         <ChartTooltipContent
-                          formatter={(value) => `${formatCurrency(Number(value))} บาท`}
+                          formatter={(value) => `${formatCurrency(Number(value))} ${t("currency.thb")}`}
                         />
                       }
                     />
@@ -321,7 +329,7 @@ export function Dashboard() {
                 </div>
               </>
             ) : (
-              <p className="py-16 text-center text-sm text-muted-foreground">ยังไม่มีข้อมูล</p>
+              <p className="py-16 text-center text-sm text-muted-foreground">{t("dash.noData")}</p>
             )}
           </CardContent>
         </Card>
@@ -331,7 +339,7 @@ export function Dashboard() {
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            รายการล่าสุด
+            {t("dash.recentTransactions")}
           </CardTitle>
         </CardHeader>
         <CardContent>

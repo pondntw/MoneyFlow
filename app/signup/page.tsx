@@ -1,10 +1,9 @@
-import Link from 'next/link'
-import { login } from './actions'
+import { signup } from '@/app/login/actions'
 import { Wallet } from 'lucide-react'
 import { AuthHero } from '@/components/auth-hero'
 import { AuthForm } from '@/components/auth-form'
 
-export default async function LoginPage({
+export default async function SignupPage({
     searchParams,
 }: {
     searchParams: { message: string }
@@ -25,7 +24,7 @@ export default async function LoginPage({
                     <span className="text-xl font-bold tracking-tight text-foreground">MoneyFlow</span>
                 </div>
 
-                <AuthForm type="login" message={params?.message} actionFn={login} />
+                <AuthForm type="signup" message={params?.message} actionFn={signup} />
             </div>
         </div>
     )

@@ -16,7 +16,7 @@ import {
   SidebarTrigger,
   SidebarFooter,
 } from "@/components/ui/sidebar"
-import { LayoutDashboard, ArrowLeftRight, Landmark, TrendingUp, Moon, Sun, LogOut, Loader2 } from "lucide-react"
+import { LayoutDashboard, ArrowLeftRight, Landmark, TrendingUp, Moon, Sun, LogOut, Loader2, Wallet } from "lucide-react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { FinanceProvider, useFinance } from "@/components/finance-provider"
 import { Dashboard } from "@/components/dashboard"
@@ -28,12 +28,21 @@ import { signout } from "@/app/login/actions"
 
 type Page = "dashboard" | "transactions" | "accounts" | "investments"
 
-const navItems = [
-  { id: "dashboard" as Page, label: "ภาพรวม", icon: LayoutDashboard },
-  { id: "transactions" as Page, label: "รายรับ-รายจ่าย", icon: ArrowLeftRight },
-  { id: "accounts" as Page, label: "บัญชีธนาคาร", icon: Landmark },
-  { id: "investments" as Page, label: "การลงทุน", icon: TrendingUp },
-]
+import { useLanguage } from "@/components/language-provider"
+
+function LanguageToggle() {
+  const { language, setLanguage } = useLanguage()
+  return (
+    <Button
+      variant="ghost"
+      className="h-9 px-2 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground font-semibold"
+      onClick={() => setLanguage(language === "th" ? "en" : "th")}
+      aria-label="Toggle language"
+    >
+      {language === "th" ? "EN" : "TH"}
+    </Button>
+  )
+}
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -54,6 +63,14 @@ function ThemeToggle() {
 function AppContent() {
   const [activePage, setActivePage] = useState<Page>("dashboard")
   const { loading } = useFinance()
+  const { t } = useLanguage()
+
+  const navItems = [
+    { id: "dashboard" as Page, label: t("nav.dashboard"), icon: LayoutDashboard },
+    { id: "transactions" as Page, label: t("nav.transactions"), icon: ArrowLeftRight },
+    { id: "accounts" as Page, label: t("nav.accounts"), icon: Landmark },
+    { id: "investments" as Page, label: t("nav.investments"), icon: TrendingUp },
+  ]
 
   const pageTitle = navItems.find((n) => n.id === activePage)?.label ?? ""
 
@@ -71,7 +88,7 @@ function AppContent() {
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-3">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
-              <TrendingUp className="size-4" />
+              <Wallet className="size-4" />
             </div>
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
               <span className="text-sm font-bold tracking-tight text-sidebar-foreground">
@@ -111,11 +128,18 @@ function AppContent() {
               size="icon"
               className="group-data-[collapsible=icon]:hidden size-9 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-red-500"
               onClick={async () => await signout()}
-              title="ออกจากระบบ"
+              title={t("logout")}
             >
               <LogOut className="size-[18px]" />
             </Button>
-            <ThemeToggle />
+            <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden">
+              <LanguageToggle />
+              <ThemeToggle />
+            </div>
+            <div className="hidden group-data-[collapsible=icon]:flex flex-col items-center gap-2">
+              <LanguageToggle />
+              <ThemeToggle />
+            </div>
           </div>
         </SidebarFooter>
       </Sidebar>

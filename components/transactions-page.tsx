@@ -10,6 +10,7 @@ import {
   type TransactionType,
   type TransactionCategory,
 } from "@/lib/store"
+import { useLanguage } from "@/components/language-provider"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,6 +34,7 @@ import { Plus, Trash2, ArrowUpRight, ArrowDownRight } from "lucide-react"
 
 export function TransactionsPage() {
   const { transactions, accounts, addTransaction, deleteTransaction } = useFinance()
+  const { t } = useLanguage()
   const [open, setOpen] = useState(false)
   const [filter, setFilter] = useState<"all" | "income" | "expense">("all")
 
@@ -77,28 +79,28 @@ export function TransactionsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
           <TabsList className="h-10 rounded-xl bg-secondary p-1">
-            <TabsTrigger value="all" className="rounded-lg px-4 text-xs font-semibold">ทั้งหมด</TabsTrigger>
-            <TabsTrigger value="income" className="rounded-lg px-4 text-xs font-semibold">รายรับ</TabsTrigger>
-            <TabsTrigger value="expense" className="rounded-lg px-4 text-xs font-semibold">รายจ่าย</TabsTrigger>
+            <TabsTrigger value="all" className="rounded-lg px-4 text-xs font-semibold">{t("txn.all")}</TabsTrigger>
+            <TabsTrigger value="income" className="rounded-lg px-4 text-xs font-semibold">{t("txn.income")}</TabsTrigger>
+            <TabsTrigger value="expense" className="rounded-lg px-4 text-xs font-semibold">{t("txn.expense")}</TabsTrigger>
           </TabsList>
           <TabsContent value="all" />
           <TabsContent value="income" />
           <TabsContent value="expense" />
         </Tabs>
         <Button onClick={() => setOpen(true)} className="gap-2 rounded-xl shadow-sm">
-          <Plus className="size-4" /> เพิ่มรายการ
+          <Plus className="size-4" /> {t("txn.add")}
         </Button>
       </div>
 
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            รายการทั้งหมด ({filtered.length})
+            {t("txn.allTitle")} ({filtered.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {filtered.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">ยังไม่มีรายการ</p>
+            <p className="py-16 text-center text-sm text-muted-foreground">{t("txn.noTxn")}</p>
           ) : (
             <div className="flex flex-col">
               {filtered.map((txn, idx) => {
@@ -122,7 +124,7 @@ export function TransactionsPage() {
                         <p className="text-sm font-medium text-foreground">{txn.description}</p>
                         <p className="text-xs text-muted-foreground">
                           {categoryLabels[txn.category]} &middot;{" "}
-                          {account?.name ?? "ไม่ระบุ"} &middot; {txn.date}
+                          {account?.name ?? t("txn.unspecified")} &middot; {txn.date}
                         </p>
                       </div>
                     </div>
@@ -155,20 +157,20 @@ export function TransactionsPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle>เพิ่มรายการใหม่</DialogTitle>
+            <DialogTitle>{t("txn.addTitle")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <Tabs value={formType} onValueChange={(v) => { setFormType(v as TransactionType); setFormCategory("") }}>
               <TabsList className="w-full rounded-xl bg-secondary p-1">
-                <TabsTrigger value="income" className="flex-1 rounded-lg text-xs font-semibold">รายรับ</TabsTrigger>
-                <TabsTrigger value="expense" className="flex-1 rounded-lg text-xs font-semibold">รายจ่าย</TabsTrigger>
+                <TabsTrigger value="income" className="flex-1 rounded-lg text-xs font-semibold">{t("txn.income")}</TabsTrigger>
+                <TabsTrigger value="expense" className="flex-1 rounded-lg text-xs font-semibold">{t("txn.expense")}</TabsTrigger>
               </TabsList>
               <TabsContent value="income" />
               <TabsContent value="expense" />
             </Tabs>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="txn-amount" className="text-xs font-medium">จำนวนเงิน (บาท)</Label>
+              <Label htmlFor="txn-amount" className="text-xs font-medium">{t("txn.amountLabel", { currency: t("currency.thb") })}</Label>
               <Input
                 id="txn-amount"
                 type="number"
@@ -180,10 +182,10 @@ export function TransactionsPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">หมวดหมู่</Label>
+              <Label className="text-xs font-medium">{t("txn.categoryLabel")}</Label>
               <Select value={formCategory} onValueChange={(v) => setFormCategory(v as TransactionCategory)}>
                 <SelectTrigger className="w-full rounded-xl">
-                  <SelectValue placeholder="เลือกหมวดหมู่" />
+                  <SelectValue placeholder={t("txn.selectCategory")} />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
@@ -196,10 +198,10 @@ export function TransactionsPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="txn-desc" className="text-xs font-medium">รายละเอียด</Label>
+              <Label htmlFor="txn-desc" className="text-xs font-medium">{t("txn.descLabel")}</Label>
               <Input
                 id="txn-desc"
-                placeholder="รายละเอียด (ไม่บังคับ)"
+                placeholder={t("txn.descPlaceholder")}
                 className="rounded-xl"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
@@ -208,7 +210,7 @@ export function TransactionsPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="txn-date" className="text-xs font-medium">วันที่</Label>
+                <Label htmlFor="txn-date" className="text-xs font-medium">{t("txn.dateLabel")}</Label>
                 <Input
                   id="txn-date"
                   type="date"
@@ -219,10 +221,10 @@ export function TransactionsPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-medium">บัญชี</Label>
+                <Label className="text-xs font-medium">{t("txn.accountLabel")}</Label>
                 <Select value={formAccountId} onValueChange={setFormAccountId}>
                   <SelectTrigger className="w-full rounded-xl">
-                    <SelectValue placeholder="เลือกบัญชี" />
+                    <SelectValue placeholder={t("txn.selectAccount")} />
                   </SelectTrigger>
                   <SelectContent>
                     {accounts.map((acc) => (
@@ -237,10 +239,10 @@ export function TransactionsPage() {
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => setOpen(false)} className="rounded-xl">
-              ยกเลิก
+              {t("common.cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={!formAmount || !formCategory || !formAccountId} className="rounded-xl">
-              บันทึก
+              {t("common.save")}
             </Button>
           </DialogFooter>
         </DialogContent>

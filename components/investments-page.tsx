@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { useFinance } from "@/components/finance-provider"
+import { useLanguage } from "@/components/language-provider"
 import { formatCurrency } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,12 +15,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus, Trash2, TrendingUp, TrendingDown, Pencil, BarChart3, Loader2 } from "lucide-react"
+import { Plus, Trash2, TrendingUp, TrendingDown, Pencil, BarChart3, Loader2, Eye, EyeOff } from "lucide-react"
 
 export function InvestmentsPage() {
   const { stocks, addStock, updateStock, deleteStock } = useFinance()
+  const { language, t } = useLanguage()
   const [open, setOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
+  const [showValue, setShowValue] = useState(true)
 
   const [formSymbol, setFormSymbol] = useState("")
   const [formName, setFormName] = useState("")
@@ -126,39 +129,47 @@ export function InvestmentsPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Page Header Toggle */}
+      <div className="flex items-center justify-end">
+        <Button variant="ghost" size="sm" onClick={() => setShowValue(!showValue)} className="gap-2 text-muted-foreground hover:text-foreground">
+          {showValue ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          <span className="text-xs font-semibold uppercase">{showValue ? (language === 'th' ? "ซ่อนจำนวนเงิน" : "Hide Balance") : (language === 'th' ? "แสดงจำนวนเงิน" : "Show Balance")}</span>
+        </Button>
+      </div>
+
       {/* Summary */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="border-0 shadow-sm">
           <CardContent className="p-5">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">ต้นทุนรวม</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("inv.totalCost")}</p>
             <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-              {formatCurrency(totalCost)}
+              {showValue ? formatCurrency(totalCost) : "***"}
               <span className="ml-1 text-xs font-normal text-muted-foreground">USD</span>
             </p>
             {exchangeRate && (
               <p className="mt-1 text-[11px] font-medium text-muted-foreground/80">
-                ≈ {formatCurrency(totalCost * exchangeRate)} THB
+                ≈ {showValue ? formatCurrency(totalCost * exchangeRate) : "***"} THB
               </p>
             )}
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm">
           <CardContent className="p-5">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">มูลค่าตลาดรวม</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("inv.totalValue")}</p>
             <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-              {formatCurrency(totalValue)}
+              {showValue ? formatCurrency(totalValue) : "***"}
               <span className="ml-1 text-xs font-normal text-muted-foreground">USD</span>
             </p>
             {exchangeRate && (
               <p className="mt-1 text-[11px] font-medium text-muted-foreground/80">
-                ≈ {formatCurrency(totalValue * exchangeRate)} THB
+                ≈ {showValue ? formatCurrency(totalValue * exchangeRate) : "***"} THB
               </p>
             )}
           </CardContent>
         </Card>
         <Card className={`border-0 shadow-sm ${totalPnL >= 0 ? "bg-chart-1/5" : "bg-chart-2/5"}`}>
           <CardContent className="p-5">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">กำไร/ขาดทุน</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("inv.pnl")}</p>
             <div className="mt-2 flex items-center gap-2">
               {totalPnL >= 0 ? (
                 <TrendingUp className="size-5 text-chart-1" />
@@ -166,8 +177,12 @@ export function InvestmentsPage() {
                 <TrendingDown className="size-5 text-chart-2" />
               )}
               <p className={`text-2xl font-bold tracking-tight ${totalPnL >= 0 ? "text-chart-1" : "text-chart-2"}`}>
-                {totalPnL >= 0 ? "+" : ""}
-                {formatCurrency(totalPnL)} <span className="text-sm font-normal">USD</span>
+                {showValue ? (
+                  <>
+                    {totalPnL >= 0 ? "+" : ""}
+                    {formatCurrency(totalPnL)}
+                  </>
+                ) : "***"} <span className="text-sm font-normal">USD</span>
               </p>
             </div>
             <div className="mt-1 flex items-center justify-between">
@@ -177,7 +192,7 @@ export function InvestmentsPage() {
               </p>
               {exchangeRate && (
                 <p className={`text-[11px] font-medium ${totalPnL >= 0 ? "text-chart-1/80" : "text-chart-2/80"}`}>
-                  ≈ {totalPnL >= 0 ? "+" : ""}{formatCurrency(totalPnL * exchangeRate)} THB
+                  ≈ {showValue ? (totalPnL >= 0 ? "+" : "") + formatCurrency(totalPnL * exchangeRate) : "***"} THB
                 </p>
               )}
             </div>
@@ -188,7 +203,7 @@ export function InvestmentsPage() {
       {/* Holdings */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">พอร์ตการลงทุน</h2>
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("inv.portfolio")}</h2>
           {isFetchingPrices && <Loader2 className="size-3 animate-spin text-muted-foreground" />}
         </div>
         <Button
@@ -198,7 +213,7 @@ export function InvestmentsPage() {
           }}
           className="gap-2 rounded-xl shadow-sm"
         >
-          <Plus className="size-4" /> เพิ่มหุ้น
+          <Plus className="size-4" /> {t("inv.addStock")}
         </Button>
       </div>
 
@@ -208,7 +223,7 @@ export function InvestmentsPage() {
             <div className="flex size-14 items-center justify-center rounded-2xl bg-muted">
               <BarChart3 className="size-6 text-muted-foreground" />
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">ยังไม่มีหุ้นในพอร์ต กดเพิ่มหุ้นเพื่อเริ่มต้น</p>
+            <p className="mt-4 text-sm text-muted-foreground">{t("inv.noStock")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -259,23 +274,27 @@ export function InvestmentsPage() {
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3 pt-2">
                   <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                    <InfoCell label="จำนวน" value={`${formatCurrency(stock.shares)} หุ้น`} />
-                    <InfoCell label="ราคาปัจจุบัน" value={`${formatCurrency(currentPrice)} USD`} />
-                    <InfoCell label="ต้นทุนเฉลี่ย" value={`${formatCurrency(stock.avgCost)} USD`} />
-                    <InfoCell label="มูลค่ารวม" value={`${formatCurrency(value)} USD`} />
+                    <InfoCell label={t("inv.sharesLabel")} value={showValue ? `${formatCurrency(stock.shares)} ${t("inv.sharesUnit")}` : "***"} />
+                    <InfoCell label={t("inv.currentPriceLabel")} value={showValue ? `${formatCurrency(currentPrice)} USD` : "***"} />
+                    <InfoCell label={t("inv.avgCostLabel")} value={showValue ? `${formatCurrency(stock.avgCost)} USD` : "***"} />
+                    <InfoCell label={t("inv.totalValueLabel")} value={showValue ? `${formatCurrency(value)} USD` : "***"} />
                   </div>
                   <div className={`flex flex-col gap-1 rounded-xl p-3 ${isPositive ? "bg-chart-1/8" : "bg-chart-2/8"}`}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">กำไร/ขาดทุน</span>
+                      <span className="text-xs text-muted-foreground">{t("inv.pnl")}</span>
                       <span className={`text-sm font-bold tabular-nums ${isPositive ? "text-chart-1" : "text-chart-2"}`}>
-                        {isPositive ? "+" : ""}
-                        {formatCurrency(pnl)} <span className="text-[10px] font-normal opacity-80">USD</span>
+                        {showValue ? (
+                          <>
+                            {isPositive ? "+" : ""}
+                            {formatCurrency(pnl)}
+                          </>
+                        ) : "***"} <span className="text-[10px] font-normal opacity-80">USD</span>
                       </span>
                     </div>
                     {exchangeRate && (
                       <div className="flex items-center justify-end text-[10px] opacity-70">
                         <span className={`font-medium ${isPositive ? "text-chart-1" : "text-chart-2"}`}>
-                          ≈ {isPositive ? "+" : ""}{formatCurrency(pnl * exchangeRate)} THB
+                          ≈ {showValue ? (isPositive ? "+" : "") + formatCurrency(pnl * exchangeRate) : "***"} THB
                         </span>
                       </div>
                     )}
@@ -291,25 +310,25 @@ export function InvestmentsPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle>{editId ? "แก้ไขหุ้น" : "เพิ่มหุ้นใหม่"}</DialogTitle>
+            <DialogTitle>{editId ? t("inv.editStock") : t("inv.addNewStock")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="stock-symbol" className="text-xs font-medium">สัญลักษณ์หุ้น</Label>
+                <Label htmlFor="stock-symbol" className="text-xs font-medium">{t("inv.symbolLabel")}</Label>
                 <Input
                   id="stock-symbol"
-                  placeholder="เช่น PTT"
+                  placeholder={t("inv.symbolPlaceholder")}
                   className="rounded-xl"
                   value={formSymbol}
                   onChange={(e) => setFormSymbol(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="stock-name" className="text-xs font-medium">ชื่อบริษัท</Label>
+                <Label htmlFor="stock-name" className="text-xs font-medium">{t("inv.companyNameLabel")}</Label>
                 <Input
                   id="stock-name"
-                  placeholder="เช่น บมจ. ปตท."
+                  placeholder={t("inv.companyNamePlaceholder")}
                   className="rounded-xl"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
@@ -317,7 +336,7 @@ export function InvestmentsPage() {
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="stock-shares" className="text-xs font-medium">จำนวนหุ้น</Label>
+              <Label htmlFor="stock-shares" className="text-xs font-medium">{t("inv.numSharesLabel")}</Label>
               <Input
                 id="stock-shares"
                 type="number"
@@ -328,7 +347,7 @@ export function InvestmentsPage() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="stock-avg" className="text-xs font-medium">ต้นทุนเฉลี่ย (USD)</Label>
+              <Label htmlFor="stock-avg" className="text-xs font-medium">{t("inv.avgCostFormLabel")}</Label>
               <Input
                 id="stock-avg"
                 type="number"
@@ -341,10 +360,10 @@ export function InvestmentsPage() {
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => { setOpen(false); resetForm() }} className="rounded-xl">
-              ยกเลิก
+              {t("common.cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={!formSymbol || !formShares || !formAvgCost} className="rounded-xl">
-              {editId ? "บันทึก" : "เพิ่มหุ้น"}
+              {editId ? t("common.save") : t("inv.addStock")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -33,6 +33,8 @@ export const viewport: Viewport = {
   themeColor: '#2a2318',
 }
 
+import { LanguageProvider } from '@/components/language-provider'
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -41,7 +43,9 @@ export default function RootLayout({
   return (
     <html lang="th" suppressHydrationWarning>
       <body className="font-sans antialiased">
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
         <Analytics />
       </body>
     </html>

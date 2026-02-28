@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useFinance } from "@/components/finance-provider"
+import { useLanguage } from "@/components/language-provider"
 import { formatCurrency, bankOptions, accountColors } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -25,6 +26,7 @@ import { Plus, Trash2, Landmark, CreditCard } from "lucide-react"
 
 export function AccountsPage() {
   const { accounts, addAccount, deleteAccount } = useFinance()
+  const { t } = useLanguage()
   const [open, setOpen] = useState(false)
   const [formName, setFormName] = useState("")
   const [formBank, setFormBank] = useState("")
@@ -60,14 +62,14 @@ export function AccountsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">ยอดรวมทุกบัญชี</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("acc.totalBalance")}</p>
           <p className="mt-1 text-3xl font-bold tracking-tight text-foreground">
             {formatCurrency(totalBalance)}{" "}
-            <span className="text-base font-normal text-muted-foreground">บาท</span>
+            <span className="text-base font-normal text-muted-foreground">{t("currency.thb")}</span>
           </p>
         </div>
         <Button onClick={() => setOpen(true)} className="gap-2 rounded-xl shadow-sm">
-          <Plus className="size-4" /> เพิ่มบัญชี
+          <Plus className="size-4" /> {t("acc.add")}
         </Button>
       </div>
 
@@ -106,7 +108,7 @@ export function AccountsPage() {
               </div>
               <p className="mt-3 text-2xl font-bold tracking-tight text-foreground">
                 {formatCurrency(acc.balance)}{" "}
-                <span className="text-xs font-normal text-muted-foreground">บาท</span>
+                <span className="text-xs font-normal text-muted-foreground">{t("currency.thb")}</span>
               </p>
             </CardContent>
           </Card>
@@ -119,7 +121,7 @@ export function AccountsPage() {
             <div className="flex size-14 items-center justify-center rounded-2xl bg-muted">
               <Landmark className="size-6 text-muted-foreground" />
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">ยังไม่มีบัญชี กดเพิ่มบัญชีเพื่อเริ่มต้น</p>
+            <p className="mt-4 text-sm text-muted-foreground">{t("acc.noAcc")}</p>
           </CardContent>
         </Card>
       )}
@@ -128,24 +130,24 @@ export function AccountsPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle>เพิ่มบัญชีธนาคาร</DialogTitle>
+            <DialogTitle>{t("acc.addTitle")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="acc-name" className="text-xs font-medium">ชื่อบัญชี</Label>
+              <Label htmlFor="acc-name" className="text-xs font-medium">{t("acc.nameLabel")}</Label>
               <Input
                 id="acc-name"
-                placeholder="เช่น บัญชีเงินเดือน"
+                placeholder={t("acc.namePlaceholder")}
                 className="rounded-xl"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">ธนาคาร</Label>
+              <Label className="text-xs font-medium">{t("acc.bankLabel")}</Label>
               <Select value={formBank} onValueChange={setFormBank}>
                 <SelectTrigger className="w-full rounded-xl">
-                  <SelectValue placeholder="เลือกธนาคาร" />
+                  <SelectValue placeholder={t("acc.selectBank")} />
                 </SelectTrigger>
                 <SelectContent>
                   {bankOptions.map((b) => (
@@ -158,7 +160,7 @@ export function AccountsPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="acc-number" className="text-xs font-medium">เลขบัญชี</Label>
+                <Label htmlFor="acc-number" className="text-xs font-medium">{t("acc.numberLabel")}</Label>
                 <Input
                   id="acc-number"
                   placeholder="xxx-x-xxxxx-x"
@@ -168,7 +170,7 @@ export function AccountsPage() {
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="acc-balance" className="text-xs font-medium">ยอดเริ่มต้น (บาท)</Label>
+                <Label htmlFor="acc-balance" className="text-xs font-medium">{t("acc.initBalanceLabel", { currency: t("currency.thb") })}</Label>
                 <Input
                   id="acc-balance"
                   type="number"
@@ -180,7 +182,7 @@ export function AccountsPage() {
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <Label className="text-xs font-medium">สีบัญชี</Label>
+              <Label className="text-xs font-medium">{t("acc.colorLabel")}</Label>
               <div className="flex gap-2.5">
                 {accountColors.map((c) => (
                   <button
@@ -196,10 +198,10 @@ export function AccountsPage() {
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => setOpen(false)} className="rounded-xl">
-              ยกเลิก
+              {t("common.cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={!formName || !formBank} className="rounded-xl">
-              บันทึก
+              {t("common.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
