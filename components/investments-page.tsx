@@ -198,14 +198,10 @@ export function InvestmentsPage() {
             </span>
             <span className={`text-sm font-bold flex items-center gap-1 tabular-nums ${totalPnL >= 0 ? 'text-chart-1' : 'text-chart-2'}`}>
               {totalPnL >= 0 ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
-              {showValue ? (
-                <>
-                  {totalPnLPercent >= 0 ? '+' : ''}{totalPnLPercent.toFixed(2)}%
-                  <span className="font-semibold ml-1">
-                    ({totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL)} USD)
-                  </span>
-                </>
-              ) : '***'}
+              {totalPnLPercent >= 0 ? '+' : ''}{totalPnLPercent.toFixed(2)}%
+              <span className="font-semibold ml-1">
+                ({showValue ? `${totalPnL >= 0 ? '+' : ''}${formatCurrency(totalPnL)} USD` : '***'})
+              </span>
             </span>
           </div>
         </CardContent>
@@ -277,8 +273,19 @@ export function InvestmentsPage() {
                 >
                   {/* Left: Logo + Symbol + Weight */}
                   <div className="flex flex-1 items-center gap-3 min-w-0">
-                    <div className="size-10 shrink-0 rounded-full bg-muted/60 flex items-center justify-center ring-1 ring-border/30">
-                      <span className="text-[11px] font-bold text-muted-foreground">
+                    <div className="size-10 shrink-0 rounded-full bg-muted/60 flex items-center justify-center ring-1 ring-border/30 overflow-hidden">
+                      <img
+                        src={`https://assets.parqet.com/logos/symbol/${stock.symbol.toUpperCase()}`}
+                        alt={stock.symbol}
+                        className="size-full object-cover"
+                        onError={(e) => {
+                          const target = e.currentTarget
+                          target.style.display = 'none'
+                          const fallback = target.nextElementSibling as HTMLElement
+                          if (fallback) fallback.style.display = 'flex'
+                        }}
+                      />
+                      <span className="text-[11px] font-bold text-muted-foreground hidden items-center justify-center size-full">
                         {stock.symbol.slice(0, 3)}
                       </span>
                     </div>
@@ -286,7 +293,7 @@ export function InvestmentsPage() {
                       <p className="text-sm font-bold text-foreground truncate">{stock.symbol}</p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <PieChart className="size-3 opacity-60" />
-                        {showValue ? `${weight.toFixed(2)}%` : '***'}
+                        {weight.toFixed(2)}%
                       </p>
                     </div>
                   </div>
@@ -307,10 +314,10 @@ export function InvestmentsPage() {
                   <div className="w-28 sm:w-32 text-right shrink-0">
                     <p className={`text-sm font-bold flex items-center justify-end gap-1 tabular-nums ${isPositive ? 'text-chart-1' : 'text-chart-2'}`}>
                       {isPositive ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-                      {showValue ? `${isPositive ? '+' : ''}${pnlPercent.toFixed(2)}%` : '***'}
+                      {isPositive ? '+' : ''}{pnlPercent.toFixed(2)}%
                     </p>
                     <p className={`text-[11px] mt-0.5 tabular-nums ${isPositive ? 'text-chart-1/80' : 'text-chart-2/80'}`}>
-                      {showValue ? `(${isPositive ? '+' : ''}${formatCurrency(pnl)} USD)` : '***'}
+                      ({showValue ? `${isPositive ? '+' : ''}${formatCurrency(pnl)} USD` : '***'})
                     </p>
                   </div>
 
