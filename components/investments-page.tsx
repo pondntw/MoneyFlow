@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus, Trash2, TrendingUp, TrendingDown, Pencil, BarChart3, Loader2, Eye, EyeOff } from "lucide-react"
+import { Plus, Trash2, TrendingUp, TrendingDown, Pencil, BarChart3, Loader2, Eye, EyeOff, PieChart } from "lucide-react"
 
 export function InvestmentsPage() {
   const { stocks, addStock, updateStock, deleteStock } = useFinance()
@@ -129,76 +129,87 @@ export function InvestmentsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page Header Toggle */}
-      <div className="flex items-center justify-end">
-        <Button variant="ghost" size="sm" onClick={() => setShowValue(!showValue)} className="gap-2 text-muted-foreground hover:text-foreground">
-          {showValue ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-          <span className="text-xs font-semibold uppercase">{showValue ? (language === 'th' ? "ซ่อนจำนวนเงิน" : "Hide Balance") : (language === 'th' ? "แสดงจำนวนเงิน" : "Show Balance")}</span>
-        </Button>
-      </div>
+      {/* Summary Card */}
+      <Card className="border-0 shadow-sm overflow-hidden">
+        {/* Gradient Header Bar */}
+        <div className="h-2 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600" />
+        <CardContent className="p-5 sm:p-6">
+          {/* Title Row */}
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-muted-foreground tracking-wide">
+              {language === 'th' ? 'มูลค่าสินทรัพย์ทั้งหมด' : 'Total Asset Value'}
+              <span className="ml-1.5 text-muted-foreground/60">
+                ({new Date().toLocaleDateString(language === 'th' ? 'th-TH' : 'en-US', { day: 'numeric', month: 'short', year: '2-digit' })}
+                {' - '}
+                {new Date().toLocaleTimeString(language === 'th' ? 'th-TH' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                {language === 'th' ? ' น.' : ''})
+              </span>
+            </p>
+            <Button variant="ghost" size="sm" onClick={() => setShowValue(!showValue)} className="gap-1.5 text-muted-foreground hover:text-foreground -mr-2">
+              {showValue ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+              <span className="text-[10px] font-semibold uppercase hidden sm:inline">
+                {showValue ? (language === 'th' ? 'ซ่อน' : 'Hide') : (language === 'th' ? 'แสดง' : 'Show')}
+              </span>
+            </Button>
+          </div>
 
-      {/* Summary */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-5">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("inv.totalCost")}</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-              {showValue ? formatCurrency(totalCost) : "***"}
-              <span className="ml-1 text-xs font-normal text-muted-foreground">USD</span>
-            </p>
-            {exchangeRate && (
-              <p className="mt-1 text-[11px] font-medium text-muted-foreground/80">
-                ≈ {showValue ? formatCurrency(totalCost * exchangeRate) : "***"} THB
-              </p>
-            )}
-          </CardContent>
-        </Card>
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-5">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("inv.totalValue")}</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-              {showValue ? formatCurrency(totalValue) : "***"}
-              <span className="ml-1 text-xs font-normal text-muted-foreground">USD</span>
-            </p>
-            {exchangeRate && (
-              <p className="mt-1 text-[11px] font-medium text-muted-foreground/80">
-                ≈ {showValue ? formatCurrency(totalValue * exchangeRate) : "***"} THB
-              </p>
-            )}
-          </CardContent>
-        </Card>
-        <Card className={`border-0 shadow-sm ${totalPnL >= 0 ? "bg-chart-1/5" : "bg-chart-2/5"}`}>
-          <CardContent className="p-5">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("inv.pnl")}</p>
-            <div className="mt-2 flex items-center gap-2">
-              {totalPnL >= 0 ? (
-                <TrendingUp className="size-5 text-chart-1" />
-              ) : (
-                <TrendingDown className="size-5 text-chart-2" />
-              )}
-              <p className={`text-2xl font-bold tracking-tight ${totalPnL >= 0 ? "text-chart-1" : "text-chart-2"}`}>
-                {showValue ? (
-                  <>
-                    {totalPnL >= 0 ? "+" : ""}
-                    {formatCurrency(totalPnL)}
-                  </>
-                ) : "***"} <span className="text-sm font-normal">USD</span>
-              </p>
+          {/* Main Value */}
+          <p className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground tabular-nums">
+            {showValue ? formatCurrency(totalValue) : '***'}
+            <span className="ml-1.5 text-base font-normal text-muted-foreground">USD</span>
+          </p>
+
+          {/* THB + Exchange Rate Row */}
+          {exchangeRate && (
+            <div className="mt-1.5 flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="font-medium tabular-nums">
+                ≈ {showValue ? formatCurrency(totalValue * exchangeRate) : '***'} THB
+              </span>
+              <span className="text-muted-foreground/50">•</span>
+              <span className="tabular-nums">
+                1 USD = {exchangeRate.toFixed(2)} THB
+              </span>
             </div>
-            <div className="mt-1 flex items-center justify-between">
-              <p className={`text-[11px] font-medium ${totalPnL >= 0 ? "text-chart-1" : "text-chart-2"}`}>
-                {totalPnLPercent >= 0 ? "+" : ""}
-                {totalPnLPercent.toFixed(2)}%
-              </p>
+          )}
+
+          {/* Divider */}
+          <div className="my-4 border-t border-border/30" />
+
+          {/* Total Cost Row */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
+              {language === 'th' ? 'ต้นทุนรวม' : 'Total Cost'}
+            </span>
+            <span className="text-sm font-semibold text-foreground tabular-nums">
+              {showValue ? formatCurrency(totalCost) : '***'}
+              <span className="ml-1 text-xs font-normal text-muted-foreground">USD</span>
               {exchangeRate && (
-                <p className={`text-[11px] font-medium ${totalPnL >= 0 ? "text-chart-1/80" : "text-chart-2/80"}`}>
-                  ≈ {showValue ? (totalPnL >= 0 ? "+" : "") + formatCurrency(totalPnL * exchangeRate) : "***"} THB
-                </p>
+                <span className="ml-2 text-[11px] font-normal text-muted-foreground/70 tabular-nums">
+                  (≈ {showValue ? formatCurrency(totalCost * exchangeRate) : '***'} THB)
+                </span>
               )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </span>
+          </div>
+
+          {/* P&L Row */}
+          <div className="mt-2.5 flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
+              {language === 'th' ? 'กำไรของสินทรัพย์ที่ถือ' : 'Unrealized P&L'}
+            </span>
+            <span className={`text-sm font-bold flex items-center gap-1 tabular-nums ${totalPnL >= 0 ? 'text-chart-1' : 'text-chart-2'}`}>
+              {totalPnL >= 0 ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
+              {showValue ? (
+                <>
+                  {totalPnLPercent >= 0 ? '+' : ''}{totalPnLPercent.toFixed(2)}%
+                  <span className="font-semibold ml-1">
+                    ({totalPnL >= 0 ? '+' : ''}{formatCurrency(totalPnL)} USD)
+                  </span>
+                </>
+              ) : '***'}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Holdings */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -227,37 +238,90 @@ export function InvestmentsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {stocks.map((stock) => {
-            const currentPrice = livePrices[stock.symbol.toUpperCase()] || stock.currentPrice
-            const value = stock.shares * currentPrice
-            const cost = stock.shares * stock.avgCost
-            const pnl = value - cost
-            const pnlPercent = cost > 0 ? (pnl / cost) * 100 : 0
-            const isPositive = pnl >= 0
+        <Card className="border-0 shadow-sm overflow-hidden">
+          <CardContent className="p-0">
+            {/* Table Header */}
+            <div className="flex items-center px-4 sm:px-5 py-3 border-b border-border/40">
+              <div className="flex-1 min-w-0">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {stocks.length} {language === 'th' ? 'สินทรัพย์' : 'Assets'}
+                </span>
+              </div>
+              <div className="w-28 sm:w-36 text-right">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {language === 'th' ? 'มูลค่าสินทรัพย์ (USD)' : 'Value (USD)'}
+                </span>
+              </div>
+              <div className="w-28 sm:w-32 text-right">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {language === 'th' ? '% กำไรและมูลค่า' : '% P&L'}
+                </span>
+              </div>
+            </div>
 
-            return (
-              <Card key={stock.id} className="group relative border-0 shadow-sm">
-                <CardHeader className="flex flex-row items-start justify-between pb-2">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
-                        {stock.symbol}
-                      </span>
-                      <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${isPositive ? "text-chart-1" : "text-chart-2"}`}>
-                        {isPositive ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-                        {isPositive ? "+" : ""}{pnlPercent.toFixed(2)}%
+            {/* Stock Rows */}
+            {stocks.map((stock, idx) => {
+              const currentPrice = livePrices[stock.symbol.toUpperCase()] || stock.currentPrice
+              const value = stock.shares * currentPrice
+              const cost = stock.shares * stock.avgCost
+              const pnl = value - cost
+              const pnlPercent = cost > 0 ? (pnl / cost) * 100 : 0
+              const isPositive = pnl >= 0
+              const weight = totalValue > 0 ? (value / totalValue) * 100 : 0
+
+              return (
+                <div
+                  key={stock.id}
+                  className={`group relative flex items-center px-4 sm:px-5 py-4 transition-colors hover:bg-muted/30 ${idx < stocks.length - 1 ? 'border-b border-border/20' : ''
+                    }`}
+                >
+                  {/* Left: Logo + Symbol + Weight */}
+                  <div className="flex flex-1 items-center gap-3 min-w-0">
+                    <div className="size-10 shrink-0 rounded-full bg-muted/60 flex items-center justify-center ring-1 ring-border/30">
+                      <span className="text-[11px] font-bold text-muted-foreground">
+                        {stock.symbol.slice(0, 3)}
                       </span>
                     </div>
-                    <p className="mt-1.5 text-xs text-muted-foreground">{stock.name}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-foreground truncate">{stock.symbol}</p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <PieChart className="size-3 opacity-60" />
+                        {showValue ? `${weight.toFixed(2)}%` : '***'}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+
+                  {/* Middle: Asset Value */}
+                  <div className="w-28 sm:w-36 text-right shrink-0">
+                    <p className="text-sm font-bold text-foreground tabular-nums">
+                      {showValue ? formatCurrency(value) : '***'}
+                    </p>
+                    {exchangeRate && (
+                      <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">
+                        ≈ {showValue ? formatCurrency(value * exchangeRate) : '***'} THB
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Right: P&L % + Amount */}
+                  <div className="w-28 sm:w-32 text-right shrink-0">
+                    <p className={`text-sm font-bold flex items-center justify-end gap-1 tabular-nums ${isPositive ? 'text-chart-1' : 'text-chart-2'}`}>
+                      {isPositive ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+                      {showValue ? `${isPositive ? '+' : ''}${pnlPercent.toFixed(2)}%` : '***'}
+                    </p>
+                    <p className={`text-[11px] mt-0.5 tabular-nums ${isPositive ? 'text-chart-1/80' : 'text-chart-2/80'}`}>
+                      {showValue ? `(${isPositive ? '+' : ''}${formatCurrency(pnl)} USD)` : '***'}
+                    </p>
+                  </div>
+
+                  {/* Hover Edit/Delete */}
+                  <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex gap-0.5 rounded-lg bg-background/80 backdrop-blur-sm border border-border/40 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
                     <Button
                       variant="ghost"
                       size="icon"
                       className="size-7 text-muted-foreground hover:text-foreground"
                       onClick={() => handleOpenEdit(stock.id)}
-                      aria-label={`แก้ไข ${stock.symbol}`}
+                      aria-label={`Edit ${stock.symbol}`}
                     >
                       <Pencil className="size-3" />
                     </Button>
@@ -266,44 +330,16 @@ export function InvestmentsPage() {
                       size="icon"
                       className="size-7 text-muted-foreground hover:text-destructive"
                       onClick={() => deleteStock(stock.id)}
-                      aria-label={`ลบ ${stock.symbol}`}
+                      aria-label={`Delete ${stock.symbol}`}
                     >
                       <Trash2 className="size-3" />
                     </Button>
                   </div>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3 pt-2">
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                    <InfoCell label={t("inv.sharesLabel")} value={showValue ? `${formatCurrency(stock.shares)} ${t("inv.sharesUnit")}` : "***"} />
-                    <InfoCell label={t("inv.currentPriceLabel")} value={showValue ? `${formatCurrency(currentPrice)} USD` : "***"} />
-                    <InfoCell label={t("inv.avgCostLabel")} value={showValue ? `${formatCurrency(stock.avgCost)} USD` : "***"} />
-                    <InfoCell label={t("inv.totalValueLabel")} value={showValue ? `${formatCurrency(value)} USD` : "***"} />
-                  </div>
-                  <div className={`flex flex-col gap-1 rounded-xl p-3 ${isPositive ? "bg-chart-1/8" : "bg-chart-2/8"}`}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{t("inv.pnl")}</span>
-                      <span className={`text-sm font-bold tabular-nums ${isPositive ? "text-chart-1" : "text-chart-2"}`}>
-                        {showValue ? (
-                          <>
-                            {isPositive ? "+" : ""}
-                            {formatCurrency(pnl)}
-                          </>
-                        ) : "***"} <span className="text-[10px] font-normal opacity-80">USD</span>
-                      </span>
-                    </div>
-                    {exchangeRate && (
-                      <div className="flex items-center justify-end text-[10px] opacity-70">
-                        <span className={`font-medium ${isPositive ? "text-chart-1" : "text-chart-2"}`}>
-                          ≈ {showValue ? (isPositive ? "+" : "") + formatCurrency(pnl * exchangeRate) : "***"} THB
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+                </div>
+              )
+            })}
+          </CardContent>
+        </Card>
       )}
 
       {/* Add/Edit Stock Dialog */}
@@ -372,11 +408,3 @@ export function InvestmentsPage() {
   )
 }
 
-function InfoCell({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className="text-sm font-medium text-foreground">{value}</p>
-    </div>
-  )
-}
