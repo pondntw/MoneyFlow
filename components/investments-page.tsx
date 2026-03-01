@@ -131,8 +131,6 @@ export function InvestmentsPage() {
     <div className="flex flex-col gap-6">
       {/* Summary Card */}
       <Card className="border-0 shadow-sm overflow-hidden">
-        {/* Gradient Header Bar */}
-        <div className="h-2 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600" />
         <CardContent className="p-5 sm:p-6">
           {/* Title Row */}
           <div className="flex items-center justify-between">
